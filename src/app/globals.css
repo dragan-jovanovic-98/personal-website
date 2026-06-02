@@ -1,26 +1,178 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ------------------------------------------------------------------ */
+/* Design tokens                                                       */
+/* "Confident editorial, technical underpinning." DARK.                */
+/* Warm near-black ground, off-white ink, one bright electric-cobalt   */
+/* accent. Same editorial bones as the light build, inverted: the      */
+/* page reads dark and professional (not neon, not overly technical),  */
+/* with a single warm light "breather" section as a deliberate beat.   */
+/* Bold carried by type (Archivo), body in IBM Plex Sans, technical    */
+/* labels and numbers in IBM Plex Mono.                                */
+/* ------------------------------------------------------------------ */
+@theme {
+  /* "paper" = the dark ground; "paper-raised" = elevated surfaces (lighter). */
+  --color-paper: #0e0f13;
+  --color-paper-raised: #181a21;
+  /* "ink" = primary text / inverted-panel ground; kept warm, not pure white. */
+  --color-ink: #f3f1ea;
+  --color-ink-soft: #c4c0b5;
+  --color-muted: #8b8678;
+  --color-line: #2a2c34;
+  /* Warm ochre: a deliberate, brand-continuous accent (carries the warmth of
+     the original paper identity) that stays distinct from the cobalt every
+     other CTO site uses. It's light, so anything sitting ON it takes dark
+     (paper) text, not white. */
+  --color-accent: #e0a23c;
+  --color-accent-hover: #efb45b;
+
+  --font-display: var(--font-archivo);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headlines: tight, heavy, confident. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 0.98;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 1px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Faint film grain over the whole page for texture. Screen-blended so the
+   noise lifts the dark ground subtly instead of disappearing into it. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------------ */
+/* Utilities                                                           */
+/* ------------------------------------------------------------------ */
+
+/* Mono eyebrow / label used above sections and on stats. */
+.eyebrow {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Animated underline that grows from the left on hover. */
+.link-underline {
+  background-image: linear-gradient(var(--color-accent), var(--color-accent));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 2px;
+  transition: background-size 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.link-underline:hover {
+  background-size: 100% 2px;
+}
+
+/* Staggered rise-in on load. Ends fully visible, so it is safe without JS. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.reveal {
+  animation: rise 0.85s cubic-bezier(0.2, 0.65, 0.2, 1) both;
+}
+
+/* Logo marquee: seamless infinite scroll of a doubled track, with faded edges
+   and pause-on-hover. */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 24s linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+.marquee-mask {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 7%,
+    #000 93%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 7%,
+    #000 93%,
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+  }
+  .marquee-track {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }
